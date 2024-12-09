@@ -23,13 +23,13 @@ const CallScreen = () => {
 
                 // Add local stream tracks to peer connection
                 stream.getTracks().forEach(track => {
-                    rtcService.peerConnection.addTrack(track, stream);
+                    rtcService.addTrack(track, stream);
                 });
 
                 // Set up remote stream handling
-                rtcService.peerConnection.ontrack = (event) => {
+                rtcService.setOnTrack((event) => {
                     setRemoteStream(event.streams[0]);
-                };
+                });
 
                 // Join the room
                 socket.emit('join-room', roomId);
@@ -43,27 +43,27 @@ const CallScreen = () => {
         return () => {
             webRTC?.cleanup();
         };
-    }, [roomId]);
+    }, [roomId, socket, webRTC]);
 
     useEffect(() => {
         if (!webRTC) return;
 
-        socket.on('user-connected', async (userId) => {
+        socket.on('user-connected', async (userId: string) => {
             console.log('User connected:', userId);
             await webRTC.createOffer(userId);
         });
 
-        socket.on('offer', async ({ sdp, caller }) => {
+        socket.on('offer', async ({ sdp, caller }: { sdp: RTCSessionDescriptionInit, caller: string }) => {
             console.log('Received offer from:', caller);
             await webRTC.handleOffer(sdp, caller);
         });
 
-        socket.on('answer', async ({ sdp }) => {
+        socket.on('answer', async ({ sdp }: { sdp: RTCSessionDescriptionInit }) => {
             console.log('Received answer');
             await webRTC.handleAnswer(sdp);
         });
 
-        socket.on('ice-candidate', ({ candidate }) => {
+        socket.on('ice-candidate', ({ candidate }: { candidate: RTCIceCandidateInit }) => {
             console.log('Received ICE candidate');
             webRTC.handleIceCandidate(candidate);
         });
@@ -74,7 +74,7 @@ const CallScreen = () => {
             socket.off('answer');
             socket.off('ice-candidate');
         };
-    }, [webRTC]);
+    }, [socket, webRTC]);
 
     return (
         <div className="call-screen">

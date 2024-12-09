@@ -1,11 +1,11 @@
-import { Socket } from "socket.io-client";
+import { Socket as SocketIOClient } from "socket.io-client";
 
 export class WebRTCService {
   private peerConnection: RTCPeerConnection;
-  private socket: Socket;
+  private socket: typeof SocketIOClient;
   private localStream: MediaStream | null = null;
 
-  constructor(socket: Socket) {
+  constructor(socket: typeof SocketIOClient) {
     this.socket = socket;
     this.peerConnection = new RTCPeerConnection({
       iceServers: [
@@ -93,5 +93,13 @@ export class WebRTCService {
       this.localStream.getTracks().forEach((track) => track.stop());
     }
     this.peerConnection.close();
+  }
+
+  public addTrack(track: MediaStreamTrack, stream: MediaStream) {
+    this.peerConnection.addTrack(track, stream);
+  }
+
+  public setOnTrack(handler: (event: RTCTrackEvent) => void) {
+    this.peerConnection.ontrack = handler;
   }
 }

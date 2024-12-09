@@ -1,9 +1,10 @@
-import { io, Socket } from "socket.io-client";
+import { Socket as SocketIOClient } from "socket.io-client";
+import io from "socket.io-client";
 
 class SocketService {
-  private static instance: Socket;
+  private static instance: typeof SocketIOClient;
 
-  public static getInstance(): Socket {
+  public static getInstance(): typeof SocketIOClient {
     if (!SocketService.instance) {
       SocketService.instance = io("http://localhost:3000", {
         transports: ["websocket"],
