@@ -43,7 +43,7 @@ const CallScreen = () => {
         return () => {
             webRTC?.cleanup();
         };
-    }, [roomId, socket, webRTC]);
+    }, [roomId]);
 
     useEffect(() => {
         if (!webRTC) return;
