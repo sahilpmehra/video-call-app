@@ -9,10 +9,10 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-const FRONTEND_URL = "http://localhost:5173";
-// const PORT = process.env.PORT || 3000;
-const PORT = 3000;
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+// const FRONTEND_URL = "http://localhost:5173";
+const PORT = process.env.PORT || 3000;
+// const PORT = 3000;
 
 const io = new Server(httpServer, {
   cors: {
