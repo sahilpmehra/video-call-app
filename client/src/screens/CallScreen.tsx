@@ -18,17 +18,18 @@ const CallScreen = () => {
             setWebRTC(rtcService);
 
             try {
+                // Set up remote stream handling
+                // By moving setOnTrack before getting the local media and adding tracks, we ensure that both parties have their ontrack handlers set up before any negotiation begins. This is crucial because WebRTC events can fire very quickly, and if the handler isn't set up early enough, we might miss some track events.
+                rtcService.setOnTrack((event) => {
+                    setRemoteStream(event.streams[0]);
+                });
+
                 const stream = await rtcService.getUserMedia();
                 setLocalStream(stream);
 
                 // Add local stream tracks to peer connection
                 stream.getTracks().forEach(track => {
                     rtcService.addTrack(track, stream);
-                });
-
-                // Set up remote stream handling
-                rtcService.setOnTrack((event) => {
-                    setRemoteStream(event.streams[0]);
                 });
 
                 // Join the room
@@ -58,8 +59,8 @@ const CallScreen = () => {
             await webRTC.handleOffer(sdp, caller);
         });
 
-        socket.on('answer', async ({ sdp }: { sdp: RTCSessionDescriptionInit }) => {
-            console.log('Received answer');
+        socket.on('answer', async ({ sdp, answerer }: { sdp: RTCSessionDescriptionInit, answerer: string }) => {
+            console.log('Received answer from:', answerer);
             await webRTC.handleAnswer(sdp);
         });
 
