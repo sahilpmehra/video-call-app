@@ -8,13 +8,13 @@ const HomeScreen = () => {
     const handleJoinRoom = (e: React.FormEvent) => {
         e.preventDefault();
         if (roomId.trim()) {
-            navigate(`/call/${roomId}`);
+            navigate(`/call/${roomId}`, { state: { isCreator: false } });
         }
     };
 
     const handleCreateRoom = () => {
         const newRoomId = Math.random().toString(36).substring(2, 7);
-        navigate(`/call/${newRoomId}`);
+        navigate(`/call/${newRoomId}`, { state: { isCreator: true } });
     };
 
     return (

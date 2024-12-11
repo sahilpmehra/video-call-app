@@ -118,3 +118,38 @@ button:focus-visible {
   background: transparent;
   color: inherit;
 }
+
+.controls {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.end-call,
+.leave-call {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.end-call {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+}
+
+.leave-call {
+  background-color: #ffc107;
+  color: black;
+  border: none;
+}
+
+.end-call:hover {
+  background-color: #c82333;
+}
+
+.leave-call:hover {
+  background-color: #e0a800;
+}

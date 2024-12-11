@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import UserVideo from '../components/UserVideo';
 import ParticipantVideo from '../components/ParticipantVideo';
 import { WebRTCService } from '../services/webRTC';
@@ -7,10 +7,34 @@ import SocketService from '../services/socketService';
 
 const CallScreen = () => {
     const { roomId } = useParams<{ roomId: string }>();
+    const location = useLocation();
+    const navigate = useNavigate();
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
     const [webRTC, setWebRTC] = useState<WebRTCService | null>(null);
     const socket = SocketService.getInstance();
+    const isCreator = location.state?.isCreator || false;
+
+    const handleEndCall = () => {
+        socket.emit('end-call', roomId);
+        cleanup();
+        navigate('/');
+    };
+
+    const handleLeaveCall = () => {
+        socket.emit('leave-call', roomId);
+        cleanup();
+        navigate('/');
+    };
+
+    const cleanup = () => {
+        if (webRTC) {
+            webRTC.cleanup();
+        }
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+    };
 
     useEffect(() => {
         const initializeCall = async () => {
@@ -33,7 +57,7 @@ const CallScreen = () => {
                 });
 
                 // Join the room
-                socket.emit('join-room', roomId);
+                socket.emit('join-room', roomId, isCreator);
             } catch (error) {
                 console.error('Error setting up call:', error);
             }
@@ -42,12 +66,22 @@ const CallScreen = () => {
         initializeCall();
 
         return () => {
-            webRTC?.cleanup();
+            cleanup();
         };
-    }, [roomId]);
+    }, [roomId, isCreator]);
 
     useEffect(() => {
         if (!webRTC) return;
+
+        socket.on('call-ended', () => {
+            cleanup();
+            navigate('/');
+        });
+
+        socket.on('user-left', (userId: string) => {
+            console.log('User left:', userId);
+            setRemoteStream(null);
+        });
 
         socket.on('user-connected', async (userId: string) => {
             console.log('User connected:', userId);
@@ -74,14 +108,24 @@ const CallScreen = () => {
             socket.off('offer');
             socket.off('answer');
             socket.off('ice-candidate');
+            socket.off('call-ended');
+            socket.off('user-left');
         };
-    }, [socket, webRTC]);
+
+    }, [webRTC, socket]);
 
     return (
         <div className="call-screen">
             <div className="videos-container">
                 <UserVideo stream={localStream} />
                 <ParticipantVideo stream={remoteStream} />
+            </div>
+            <div className="controls">
+                {isCreator ? (
+                    <button onClick={handleEndCall} className="end-call">End Call</button>
+                ) : (
+                    <button onClick={handleLeaveCall} className="leave-call">Leave Call</button>
+                )}
             </div>
         </div>
     );

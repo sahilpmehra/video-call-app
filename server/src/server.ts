@@ -9,8 +9,10 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-const PORT = process.env.PORT || 3000;
+// const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL = "http://localhost:5173";
+// const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 const io = new Server(httpServer, {
   cors: {
@@ -26,12 +28,18 @@ app.use(
 );
 app.use(express.json());
 
+// Add at the top of the file
+const roomCreators = new Map<string, string>();
+
 // Socket.IO connection handling
 io.on("connection", (socket: Socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("join-room", (roomId: string) => {
+  socket.on("join-room", (roomId: string, isCreator: boolean) => {
     socket.join(roomId);
+    if (isCreator) {
+      roomCreators.set(roomId, socket.id);
+    }
     socket.to(roomId).emit("user-connected", socket.id);
   });
 
@@ -56,8 +64,28 @@ io.on("connection", (socket: Socket) => {
     });
   });
 
+  socket.on("end-call", (roomId: string) => {
+    const creatorId = roomCreators.get(roomId);
+    if (creatorId === socket.id) {
+      io.to(roomId).emit("call-ended");
+      roomCreators.delete(roomId);
+    }
+  });
+
+  socket.on("leave-call", (roomId: string) => {
+    socket.to(roomId).emit("user-left", socket.id);
+    socket.leave(roomId);
+  });
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
+    // Clean up room creator if disconnected user was a creator
+    for (const [roomId, creatorId] of roomCreators.entries()) {
+      if (creatorId === socket.id) {
+        roomCreators.delete(roomId);
+        io.to(roomId).emit("call-ended");
+      }
+    }
   });
 });
 
