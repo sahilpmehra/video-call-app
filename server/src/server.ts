@@ -2,20 +2,29 @@ import express from "express";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
+
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const PORT = process.env.PORT || 3000;
+
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173", // Vite's default port
+    origin: FRONTEND_URL,
     methods: ["GET", "POST"],
   },
 });
 
-app.use(cors());
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+  })
+);
 app.use(express.json());
-
-const PORT = process.env.PORT || 3000;
 
 // Socket.IO connection handling
 io.on("connection", (socket: Socket) => {
