@@ -129,7 +129,7 @@ const CallScreen = () => {
     }, [webRTC, socket]);
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-900 p-4">
+        <div className="flex flex-col h-[100dvh] bg-gray-900 p-4">
             <VideoGrid
                 remoteStream={remoteStream}
                 localStream={localStream}
