@@ -12,6 +12,7 @@ const CallScreen = () => {
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
     const [webRTC, setWebRTC] = useState<WebRTCService | null>(null);
+    const [showCopiedMessage, setShowCopiedMessage] = useState(false);
     const socket = SocketService.getInstance();
     const isCreator = location.state?.isCreator || false;
 
@@ -25,6 +26,17 @@ const CallScreen = () => {
         socket.emit('leave-call', roomId);
         cleanup();
         navigate('/');
+    };
+
+    const handleShareLink = async () => {
+        const roomLink = `${window.location.origin}/call/${roomId}`;
+        try {
+            await navigator.clipboard.writeText(roomLink);
+            setShowCopiedMessage(true);
+            setTimeout(() => setShowCopiedMessage(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy link:', err);
+        }
     };
 
     const cleanup = () => {
@@ -115,16 +127,41 @@ const CallScreen = () => {
     }, [webRTC, socket]);
 
     return (
-        <div className="call-screen">
-            <div className="videos-container">
+        <div className="min-h-screen bg-gray-900 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <UserVideo stream={localStream} />
                 <ParticipantVideo stream={remoteStream} />
             </div>
-            <div className="controls">
+            <div className="fixed bottom-0 left-0 right-0 p-4 flex justify-center items-center space-x-4 bg-gradient-to-t from-black/50 to-transparent">
+                {isCreator && (
+                    <div className="relative">
+                        <button
+                            onClick={handleShareLink}
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-8 rounded-full transition-colors"
+                        >
+                            Share Link
+                        </button>
+                        {showCopiedMessage && (
+                            <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-1 rounded text-sm">
+                                Link copied!
+                            </div>
+                        )}
+                    </div>
+                )}
                 {isCreator ? (
-                    <button onClick={handleEndCall} className="end-call">End Call</button>
+                    <button
+                        onClick={handleEndCall}
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-8 rounded-full transition-colors"
+                    >
+                        End Call
+                    </button>
                 ) : (
-                    <button onClick={handleLeaveCall} className="leave-call">Leave Call</button>
+                    <button
+                        onClick={handleLeaveCall}
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-8 rounded-full transition-colors"
+                    >
+                        Leave Call
+                    </button>
                 )}
             </div>
         </div>

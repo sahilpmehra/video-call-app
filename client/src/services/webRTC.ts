@@ -15,6 +15,12 @@ export class WebRTCService {
         { urls: "stun:stun2.l.google.com:19302" },
         { urls: "stun:stun3.l.google.com:19302" },
         { urls: "stun:stun4.l.google.com:19302" },
+        { urls: "stun:stun5.l.google.com:19302" },
+        { urls: "stun:stun6.l.google.com:19302" },
+        { urls: "stun:stun7.l.google.com:19302" },
+        { urls: "stun:stun8.l.google.com:19302" },
+        { urls: "stun:stun9.l.google.com:19302" },
+        { urls: "stun:stun10.l.google.com:19302" },
         {
           urls: "turn:YOUR_TURN_SERVER",
           username: "YOUR_USERNAME",

@@ -14,14 +14,17 @@ const UserVideo = ({ stream }: UserVideoProps) => {
     }, [stream]);
 
     return (
-        <div className="video-container">
+        <div className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden">
             <video
                 ref={videoRef}
                 autoPlay
                 muted
                 playsInline
-                className="user-video"
+                className="w-full h-full object-cover"
             />
+            <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-white text-sm">
+                You
+            </div>
         </div>
     );
 };
