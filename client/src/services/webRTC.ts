@@ -120,8 +120,11 @@ export class WebRTCService {
     this.peerConnection.close();
   }
 
-  public addTrack(track: MediaStreamTrack, stream: MediaStream) {
-    this.peerConnection.addTrack(track, stream);
+  public addTrack(track: MediaStreamTrack, stream: MediaStream): Promise<void> {
+    return new Promise((resolve) => {
+      this.peerConnection.addTrack(track, stream);
+      resolve();
+    });
   }
 
   public setOnTrack(handler: (event: RTCTrackEvent) => void) {

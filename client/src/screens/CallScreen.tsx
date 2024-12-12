@@ -61,15 +61,16 @@ const CallScreen = () => {
                     setRemoteStream(event.streams[0]);
                 });
 
+                // 2. Get local stream and add tracks to peer connection
                 const stream = await rtcService.getUserMedia();
                 setLocalStream(stream);
 
-                // Add local stream tracks to peer connection
-                stream.getTracks().forEach(track => {
-                    rtcService.addTrack(track, stream);
-                });
+                // 3. Wait for tracks to be added to peer connection
+                await Promise.all(stream.getTracks().map(track => {
+                    return rtcService.addTrack(track, stream);
+                }));
 
-                // Join the room
+                // 4. Only join room after everything is set up
                 socket.emit('join-room', roomId, isCreator);
             } catch (error) {
                 console.error('Error setting up call:', error);
