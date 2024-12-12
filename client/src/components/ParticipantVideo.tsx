@@ -14,7 +14,7 @@ const ParticipantVideo = ({ stream }: ParticipantVideoProps) => {
     }, [stream]);
 
     return (
-        <div className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden">
+        <div className="relative aspect-w-9 aspect-h-16 md:aspect-video bg-gray-800 rounded-lg overflow-hidden m-2">
             <video
                 ref={videoRef}
                 autoPlay

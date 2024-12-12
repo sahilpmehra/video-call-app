@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import UserVideo from '../components/UserVideo';
-import ParticipantVideo from '../components/ParticipantVideo';
 import { WebRTCService } from '../services/webRTC';
 import SocketService from '../services/socketService';
+import VideoGrid from '../components/call/VideoGrid';
+import CallControls from '../components/call/CallControls';
 
 const CallScreen = () => {
     const { roomId } = useParams<{ roomId: string }>();
@@ -129,43 +129,18 @@ const CallScreen = () => {
     }, [webRTC, socket]);
 
     return (
-        <div className="min-h-screen bg-gray-900 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <UserVideo stream={localStream} />
-                <ParticipantVideo stream={remoteStream} />
-            </div>
-            <div className="fixed bottom-0 left-0 right-0 p-4 flex justify-center items-center space-x-4 bg-gradient-to-t from-black/50 to-transparent">
-                {isCreator && (
-                    <div className="relative">
-                        <button
-                            onClick={handleShareLink}
-                            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-8 rounded-full transition-colors"
-                        >
-                            Share Link
-                        </button>
-                        {showCopiedMessage && (
-                            <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-1 rounded text-sm">
-                                Link copied!
-                            </div>
-                        )}
-                    </div>
-                )}
-                {isCreator ? (
-                    <button
-                        onClick={handleEndCall}
-                        className="bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-8 rounded-full transition-colors"
-                    >
-                        End Call
-                    </button>
-                ) : (
-                    <button
-                        onClick={handleLeaveCall}
-                        className="bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-8 rounded-full transition-colors"
-                    >
-                        Leave Call
-                    </button>
-                )}
-            </div>
+        <div className="flex flex-col min-h-screen bg-gray-900 p-4">
+            <VideoGrid
+                remoteStream={remoteStream}
+                localStream={localStream}
+            />
+            <CallControls
+                isCreator={isCreator}
+                onShareLink={handleShareLink}
+                onEndCall={handleEndCall}
+                onLeaveCall={handleLeaveCall}
+                showCopiedMessage={showCopiedMessage}
+            />
         </div>
     );
 };
