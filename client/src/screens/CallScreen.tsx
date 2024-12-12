@@ -29,7 +29,8 @@ const CallScreen = () => {
     };
 
     const handleShareLink = async () => {
-        const roomLink = `${window.location.origin}/call/${roomId}`;
+        const baseUrl = window.location.origin;
+        const roomLink = `${baseUrl}/?room=${roomId}`;
         try {
             await navigator.clipboard.writeText(roomLink);
             setShowCopiedMessage(true);

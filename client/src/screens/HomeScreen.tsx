@@ -1,9 +1,19 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const HomeScreen = () => {
     const [roomId, setRoomId] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        // Check if there's a room ID in the URL
+        const urlParams = new URLSearchParams(location.search);
+        const roomIdFromUrl = urlParams.get('room');
+        if (roomIdFromUrl) {
+            navigate(`/call/${roomIdFromUrl}`, { state: { isCreator: false } });
+        }
+    }, [location, navigate]);
 
     const handleJoinRoom = (e: React.FormEvent) => {
         e.preventDefault();
