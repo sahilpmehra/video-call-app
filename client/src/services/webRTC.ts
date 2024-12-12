@@ -4,6 +4,7 @@ export class WebRTCService {
   private peerConnection: RTCPeerConnection;
   private socket: typeof SocketIOClient;
   private localStream: MediaStream | null = null;
+  private targetUserId: string | null = null;
 
   constructor(socket: typeof SocketIOClient) {
     this.socket = socket;
@@ -11,16 +12,32 @@ export class WebRTCService {
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun2.l.google.com:19302" },
+        { urls: "stun:stun3.l.google.com:19302" },
+        { urls: "stun:stun4.l.google.com:19302" },
+        {
+          urls: "turn:YOUR_TURN_SERVER",
+          username: "YOUR_USERNAME",
+          credential: "YOUR_PASSWORD",
+        },
       ],
+      iceCandidatePoolSize: 10,
     });
 
     this.peerConnection.onicecandidate = (event) => {
-      if (event.candidate) {
+      if (event.candidate && this.targetUserId) {
         this.socket.emit("ice-candidate", {
           candidate: event.candidate,
-          target: this.socket.id,
+          target: this.targetUserId,
         });
       }
+    };
+
+    this.peerConnection.oniceconnectionstatechange = () => {
+      console.log(
+        "ICE Connection State:",
+        this.peerConnection.iceConnectionState
+      );
     };
   }
 
@@ -39,6 +56,7 @@ export class WebRTCService {
 
   async createOffer(targetUserId: string) {
     try {
+      this.targetUserId = targetUserId;
       const offer = await this.peerConnection.createOffer();
       await this.peerConnection.setLocalDescription(offer);
       this.socket.emit("offer", {
@@ -53,6 +71,7 @@ export class WebRTCService {
 
   async handleOffer(offer: RTCSessionDescriptionInit, callerId: string) {
     try {
+      this.targetUserId = callerId;
       await this.peerConnection.setRemoteDescription(
         new RTCSessionDescription(offer)
       );

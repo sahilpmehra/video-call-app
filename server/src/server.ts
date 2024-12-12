@@ -58,7 +58,13 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("ice-candidate", (payload: any) => {
-    io.to(payload.target).emit("ice-candidate", {
+    console.log(
+      "Forwarding ICE candidate from",
+      socket.id,
+      "to",
+      payload.target
+    );
+    socket.to(payload.target).emit("ice-candidate", {
       candidate: payload.candidate,
       from: socket.id,
     });
